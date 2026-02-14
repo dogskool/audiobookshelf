@@ -1,0 +1,30 @@
+Audiobooks api
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlJZCI6IjM3YzkxZjczLWI0YTQtNDQ3NS1iNDQxLTdmMTBmZjc4MzA5YSIsIm5hbWUiOiJpT1MgYXBwIiwidHlwZSI6ImFwaSIsImlhdCI6MTc3MDE2MzQ1M30.VlKVnnyE6YS8XJf8cvgKQ4OWC4JysBiYcfbpOtEWTRw
+
+remove existing container
+docker rm -f "Audio-Bookshelf" 2>&1
+
+Remove old volumes for clean install
+docker volume rm abs-server-node_modules abs-client-node_modules 2>&1
+
+Rebuild image from scratch
+docker build --no-cache --build-arg VARIANT=20 -t audiobookshelf-devcontainer "f:\Github\audiobookshelf\.devcontainer" 2>&1
+
+start fresh containerMSYS_NO_PATHCONV=1 docker run -d --name "Audio-Bookshelf" -p 3001:3000 -p 3334:3333 --mount "type=bind,source=f:/Github/audiobookshelf,target=/workspaces/audiobookshelf" --mount "source=abs-server-node_modules,target=/workspaces/audiobookshelf/node_modules,type=volume" --mount "source=abs-client-node_modules,target=/workspaces/audiobookshelf/client/node_modules,type=volume" --workdir /workspaces/audiobookshelf audiobookshelf-devcontainer sleep infinity 2>&1
+
+install dependenaces
+MSYS_NO_PATHCONV=1 docker exec -w /workspaces/audiobookshelf "Audio-Bookshelf" sh .devcontainer/post-create.sh 2>&1
+
+Start dev server
+MSYS_NO_PATHCONV=1 docker exec -d "Audio-Bookshelf" sh -c "cd /workspaces/audiobookshelf && npm run dev" 2>&1
+
+Verify server is listening
+sleep 8 && MSYS_NO_PATHCONV=1 docker exec "Audio-Bookshelf" sh -c "netstat -tlnp 2>/dev/null || ss -tlnp" 2>&1
+
+
+
+
+
+
+

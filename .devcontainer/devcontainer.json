@@ -11,6 +11,7 @@
 			"VARIANT": "20"
 		}
 	},
+	"runArgs": ["--name", "Audio-Bookshelf"],
 	"mounts": [
 		"source=abs-server-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
 		"source=abs-client-node_modules,target=${containerWorkspaceFolder}/client/node_modules,type=volume"

@@ -185,34 +185,38 @@ class Server {
   }
 
   /**
-   * Listen for SIGINT and uncaught exceptions
+   * Listen for SIGINT, SIGTERM, and uncaught exceptions
    */
   initProcessEventListeners() {
-    let sigintAlreadyReceived = false
-    process.on('SIGINT', async () => {
-      if (!sigintAlreadyReceived) {
-        sigintAlreadyReceived = true
-        Logger.info('SIGINT (Ctrl+C) received. Shutting down...')
+    let shutdownAlreadyReceived = false
+    const gracefulShutdown = async (signal) => {
+      if (!shutdownAlreadyReceived) {
+        shutdownAlreadyReceived = true
+        Logger.info(`${signal} received. Shutting down...`)
         await this.stop()
         Logger.info('Server stopped. Exiting.')
       } else {
-        Logger.info('SIGINT (Ctrl+C) received again. Exiting immediately.')
+        Logger.info(`${signal} received again. Exiting immediately.`)
       }
       process.exit(0)
-    })
+    }
+
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'))
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
 
     /**
-     * @see https://nodejs.org/api/process.html#event-uncaughtexceptionmonitor
+     * @see https://nodejs.org/api/process.html#event-uncaughtexception
      */
-    process.on('uncaughtExceptionMonitor', async (error, origin) => {
+    process.on('uncaughtException', async (error, origin) => {
       await Logger.fatal(`[Server] Uncaught exception origin: ${origin}, error:`, util.format('%O', error))
+      // Log but do not exit - allow the server to continue running
     })
     /**
      * @see https://nodejs.org/api/process.html#event-unhandledrejection
      */
     process.on('unhandledRejection', async (reason, promise) => {
       await Logger.fatal('[Server] Unhandled rejection:', reason, '\npromise:', util.format('%O', promise))
-      process.exit(1)
+      // Log but do not exit - allow the server to continue running
     })
   }
 

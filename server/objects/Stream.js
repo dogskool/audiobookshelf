@@ -360,6 +360,7 @@ class Stream extends EventEmitter {
 
     Logger.info('Closing Stream', this.id)
     if (this.ffmpeg) {
+      this.ffmpeg.removeAllListeners()
       this.ffmpeg.kill('SIGKILL')
     }
 
@@ -381,6 +382,7 @@ class Stream extends EventEmitter {
   cancelTranscode() {
     clearInterval(this.loop)
     if (this.ffmpeg) {
+      this.ffmpeg.removeAllListeners()
       this.ffmpeg.kill('SIGKILL')
     }
   }
