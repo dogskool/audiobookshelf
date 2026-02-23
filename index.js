@@ -1,3 +1,8 @@
+// Prevent EPIPE errors on stdout/stderr from crashing the process
+// This can happen when running detached (e.g. docker exec -d) and the pipe breaks
+process.stdout?.on('error', (err) => { if (err.code !== 'EPIPE') throw err })
+process.stderr?.on('error', (err) => { if (err.code !== 'EPIPE') throw err })
+
 const optionDefinitions = [
   { name: 'config', alias: 'c', type: String },
   { name: 'metadata', alias: 'm', type: String },

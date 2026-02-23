@@ -111,7 +111,11 @@ class Logger {
     const level = LogLevel[levelName]
     if (level < LogLevel.FATAL && level < this.logLevel) return
     const consoleMethod = Logger.ConsoleMethods[levelName]
-    console[consoleMethod](`[${this.timestamp}] ${levelName}:`, ...args)
+    try {
+      console[consoleMethod](`[${this.timestamp}] ${levelName}:`, ...args)
+    } catch (err) {
+      // Ignore EPIPE errors from broken stdout/stderr pipes (e.g. detached docker exec)
+    }
     return this.#logToFileAndListeners(level, levelName, args, source)
   }
 
